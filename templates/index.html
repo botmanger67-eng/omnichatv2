@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniChat – AI Chat Platform</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts for clean typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset & base */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e4e4f0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Glassmorphism container */
+        .app-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(20, 20, 30, 0.55);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background: rgba(30, 30, 45, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px;
+            gap: 16px;
+            transition: width 0.25s ease;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #a78bfa, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .new-chat-btn {
+            background: rgba(167, 139, 250, 0.15);
+            border: 1px solid rgba(167, 139, 250, 0.25);
+            color: #a78bfa;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        .new-chat-btn:hover {
+            background: rgba(167, 139, 250, 0.3);
+            border-color: #a78bfa;
+            color: #fff;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 4px;
+        }
+
+        .chat-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chat-list::-webkit-scrollbar-thumb {
+            background: rgba(167, 139, 250, 0.3);
+            border-radius: 8px;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s, border 0.2s;
+            border: 1px solid transparent;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .chat-item:hover {
+            background: rgba(167, 139, 250, 0.08);
+            border-color: rgba(167, 139, 250, 0.15);
+        }
+
+        .chat-item.active {
+            background: rgba(167, 139, 250, 0.12);
+            border-color: rgba(167, 139, 250, 0.3);
+        }
+
+        .chat-item i {
+            color: #7c3aed;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .chat-item .chat-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 400;
+            color: #c8c8e0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-item .chat-date {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 4px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 18px;
+            cursor: pointer;
+            margin-left: auto;
+            transition: color 0.2s;
+        }
+
+        .settings-btn:hover {
+            color: #a78bfa;
+        }
+
+        /* Main chat area */
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            position: relative;
+        }
+
+        /* Empty state (shown when no messages) */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            gap: 12px;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: rgba(167, 139, 250, 0.3);
+            margin-bottom: 8px;
+        }
+
+        .empty-state h2 {
+            font-size: 22px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #a78bfa, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.45);
+            max-width: 340px;
+            line-height: 1.6;
+        }
+
+        /* Message container (hidden by default, shown via JS) */
+        .message-container {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px 24px;
+            gap: 16px;
+        }
+
+        .message-container.active {
+            display: flex;
+        }
+
+        .message-container::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .message-container::-webkit-scrollbar-thumb {
+            background: rgba(167, 139, 250, 0.3);
+            border-radius: 8px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+        }
+
+        .message .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .message.user .avatar {
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            color: #fff;
+        }
+
+        .message.ai .avatar {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            color: #a78bfa;
+        }
+
+        .message .bubble {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 14px;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+
+        .message.user .bubble {
+            background: rgba(167, 139, 250, 0.15);
+            border-color: rgba(167, 139, 250, 0.2);
+        }
+
+        .message.ai .bubble {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .message .bubble .file-attachment {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 12px;
+            color: #a78bfa;
+            cursor: pointer;
+        }
+
+        .message .bubble .voice-note {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .voice-note i {
+            color: #a78bfa;
+        }
+
+        /* Input bar */
+        .input-bar {
+            padding: 16px 24px 20px;
+            background: rgba(20, 20, 30, 0.3);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 6px 8px;
+            transition: border 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: rgba(167, 139, 250, 0.4);
+        }
+
+        .input-wrapper textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            resize: none;
+            padding: 8px 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #e4e4f0;
+            outline: none;
+            max-height: 120px;
+            line-height: 1.5;
+        }
+
+        .input-wrapper textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .input-actions button {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 18px;
+            padding: 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .input-actions button:hover {
+            background: rgba(167, 139, 250, 0.1);
+            color: #a78bfa;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #7c3aed, #a78bfa) !important;
+            color: #fff !important;
+            border-radius: 12px !important;
+            padding: 10px 16px !important;
+            font-size: 16px !important;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+            transition: all 0.2s !important;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+        }
+
+        /* animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 220px;
+                min-width: 220px;
+                padding: 16px 12px;
+            }
+            .sidebar-header h1 { font-size: 17px; }
+            .message { max-width: 95%; }
+            .input-bar { padding: 12px 16px 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 60px;
+                min-width: 60px;
+                padding: 12px 8px;
+            }
+            .sidebar-header h1 { display: none; }
+            .chat-item .chat-name, .chat-item .chat-date, .user-name, .settings-btn { display: none; }
+            .chat-item { justify-content: center; padding: 8px; }
+            .new-chat-btn { width: 32px; height: 32px; font-size: 14px; }
+            .user-info { justify-content: center; }
+            .user-avatar { width: 28px; height: 28px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" role="complementary" aria-label="Chat sessions">
+            <div class="sidebar-header">
+                <h1>OmniChat</h1>
+                <button class="new-chat-btn" aria-label="New chat" title="New chat">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div class="chat-list" role="list">
+                <!-- Example chat items – could be dynamically generated -->
+                <div class="chat-item active" role="listitem">
+                    <i class="fas fa-comment-dots"></i>
+                    <span class="chat-name">DeepSeek integration</span>
+                    <span class="chat-date">Today</span>
+                </div>
+                <div class="chat-item" role="listitem">
+                    <i class="fas fa-comment-dots"></i>
+                    <span class="chat-name">Voice recording test</span>
+                    <span class="chat-date">Yesterday</span>
+                </div>
+                <div class="chat-item" role="listitem">
+                    <i class="fas fa-comment-dots"></i>
+                    <span class="chat-name">File attachment demo</span>
+                    <span class="chat-date">2 days ago</span>
+                </div>
+                <div class="chat-item" role="listitem">
+                    <i class="fas fa-comment-dots"></i>
+                    <span class="chat-name">Architecture discussion</span>
+                    <span class="chat-date">3 days ago</span>
+                </div>
+                <div class="chat-item" role="listitem">
+                    <i class="fas fa-comment-dots"></i>
+                    <span class="chat-name">General Q&A</span>
+                    <span class="chat-date">1 week ago</span>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">U</div>
+                    <span class="user-name">User</span>
+                    <button class="settings-btn" aria-label="Settings" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main chat area -->
+        <main class="main-area">
+            <!-- Empty state (default) -->
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-robot"></i>
+                <h2>Welcome to OmniChat</h2>
+                <p>Your intelligent AI assistant. Start by typing a message, attaching a file, or recording a voice note.</p>
+            </div>
+
+            <!-- Message container (hidden until activity) -->
+            <div class="message-container" id="messageContainer" role="log" aria-live="polite">
+                <!-- Example messages – static for demo -->
+                <div class="message ai">
+                    <div class="avatar"><i class="fas fa-robot"></i></div>
+                    <div class="bubble">
+                        Hello! How can I assist you today?
+                    </div>
+                </div>
+                <div class="message user">
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                    <div class="bubble">
+                        Can you help me with file attachments?
+                    </div>
+                </div>
+                <div class="message ai">
+                    <div class="avatar"><i class="fas fa-robot"></i></div>
+                    <div class="bubble">
+                        Absolutely! You can upload images, PDFs, or text files. I'll analyze the content and respond accordingly.
+                        <div class="file-attachment">
+                            <i class="fas fa-file-alt"></i>
+                            <span>sample_report.pdf</span>
+                            <i class="fas fa-download" style="margin-left:auto; opacity:0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="message user">
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                    <div class="bubble">
+                        Try a voice note? 
+                    </div>
+                </div>
+                <div class="message ai">
+                    <div class="avatar"><i class="fas fa-robot"></i></div>
+                    <div class="bubble">
+                        Voice notes are supported. Tap the microphone button to record.
+                        <div class="voice-note">
+                            <i class="fas fa-microphone"></i>
+                            <span>00:32</span>
+                            <i class="fas fa-play" style="margin-left:auto; cursor:pointer;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input bar -->
+            <div class="input-bar">
+                <div class="input-wrapper">
+                    <textarea rows="1" placeholder="Type your message..." aria-label="Message input"></textarea>
+                    <div class="input-actions">
+                        <button aria-label="Attach file" title="Attach file">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button aria-label="Voice recording" title="Voice recording">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                </div>
+                <button class="send-btn" aria-label="Send message" title="Send">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Minimal JavaScript to toggle between empty state and message container for demo -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // This is a placeholder: you can later add logic to hide empty state when messages exist.
+            // For now we keep the empty state visible and message container hidden (as per default).
+            // To test: remove 'active' class from message container and hide empty state manually:
+            // const empty = document.getElementById('emptyState');
+            // const msgContainer = document.getElementById('messageContainer');
+            // msgContainer.classList.add('active'); // uncomment to show messages instead
+            // empty.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
